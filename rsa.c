@@ -1,0 +1,1 @@
+char *gerar_chave(unsigned long long, unsigned long long, unsigned long long);
