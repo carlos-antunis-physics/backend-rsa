@@ -114,6 +114,8 @@ if(mdc(e, mult)!=1){
     return 0;
 }
 else{
+    FILE *ChavePublica = fopen("ChavePublica.txt", "w");
+    fprintf(ChavePublica, "%llu %llu", n, e);
     return n;
-}
+    }
 }
