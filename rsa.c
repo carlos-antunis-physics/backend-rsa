@@ -76,3 +76,44 @@ void decifrar(char *cifrada, unsigned long long p, unsigned long long q, unsigne
 
     return;
 }
+
+long long mdc(long long a, long long b) {
+    long long r;
+    while (b != 0) {
+        r = a % b;
+        a = b;
+        b = r;
+    }
+    return a;
+}
+
+short eh_primo(long long unsigned n) {
+    const short False = 0, True = 1;
+    for (int i = 2; i * i <= n; i++) {  // para todos os possiveis divisores
+        //  caso o resto da divisao entre n e o divisor seja 0
+        if (!(n % i)) {
+            return False;               // o numero eh composto
+        }
+    }
+    //  caso nenhum dos possiveis divisores o divida
+    return True;                        // o numero eh primo
+}
+
+long long unsigned gerarChave(long long unsigned p, long long unsigned q, long long unsigned e){
+    long long unsigned mult = (p-1)*(q-1);
+    if(!(eh_primo(p) && eh_primo(q))){
+        printf("insira apenas numeros primos");
+        return 0;
+    }
+
+    long long unsigned n = p*q;
+
+
+if(mdc(e, mult)!=1){
+    printf("insira um 'e' que seja coprimo a p e q");
+    return 0;
+}
+else{
+    return n;
+}
+}
