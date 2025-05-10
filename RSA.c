@@ -82,6 +82,7 @@ public_key_result_t generatePublicKey(mpz_t p, mpz_t q, mpz_t e) {
     *   @param mpz_t q: second prime number
     *   @param mpz_t e: public exponent
     */
+
     //  check if p and q are prime numbers
     if (!isPrime(p) || !isPrime(q)) {
         return KEY_ERROR_INVALID_PRIMES;
@@ -121,10 +122,14 @@ public_key_result_t generatePublicKey(mpz_t p, mpz_t q, mpz_t e) {
 void encryptMessage(char *mnsg, mpz_t n, mpz_t e)
 {
     /*
-    *   void encryptMessage(char *, mpz_t, mpz_t)
-    *       Encrypts a message using RSA protocol for the informed public key in
-    *       "cypher.txt" file.
-    */
+     *  void encryptMessage(char *, mpz_t, mpz_t)
+     *      Encrypts a message using RSA protocol for the informed public key in
+     *      "cypher.txt" file.
+     *
+     *  @param char *mnsg: message to be encrypted
+     *  @param mpz_t n: public key modular base
+     *  @param mpz_t e: public exponent
+     */
     //  Open cyphertext file
     FILE *cypher_text = fopen("cypher.txt", "w");
 
@@ -154,6 +159,12 @@ void decryptMessage(mpz_t *cphr, size_t len, mpz_t p, mpz_t q, mpz_t e)
     *   void decryptMessage(mpz_t *, size_t, mpz_t, mpz_t, mpz_t)
     *       Decrypts a message using RSA protocol for the informed private key in
     *       "message.txt" file.
+    * 
+    *   @param mpz_t *cphr: cyphertext to be decrypted
+    *   @param size_t len: length of the cyphertext
+    *   @param mpz_t p: first prime number
+    *   @param mpz_t q: second prime number
+    *   @param mpz_t e: public exponent
     */
     //  Get private key
     mpz_t n, d;
