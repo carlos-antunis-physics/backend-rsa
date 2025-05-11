@@ -20,19 +20,15 @@
 #include <stdbool.h>
 #include <string.h>
 
+//  Emscripten libraries
+#include <emscripten.h>
+
 //  GNU Multiple Precision Arithmetic Library
-#include <gmp.h>
+#include "../gmp-6.3.0/mini-gmp/mini-gmp.c"
 
-//  enumeration of error codes
-typedef enum {
-    KEY_VALID = 0,
-    KEY_ERROR_INVALID_PRIMES,
-    KEY_ERROR_INVALID_E,
-} public_key_result_t;
-
-bool isPrime(mpz_t n) {
+bool __isPrime(mpz_t n) {
     /*
-    *   bool isPrime(mpz_t)
+    *   bool __isPrime(mpz_t)
     *       Checks if a number is prime or not.
     *   
     *   @param mpz_t n: number to be checked
@@ -72,20 +68,27 @@ bool isPrime(mpz_t n) {
     return true; // not divisible, so it's a prime
 }
 
-public_key_result_t generatePublicKey(mpz_t p, mpz_t q, mpz_t e) {
+EMSCRIPTEN_KEEPALIVE
+char *generatePublicKey(const char *_p, const char *_q, const char *_e) {
     /*
-    *   public_key_result_t generatePublicKey(mpz_t, mpz_t, mpz_t)
+    *   char * generatePublicKey(const char *, const char *, const char *)
     *       Generates the public key for RSA encryption in "public_key.txt" file
     *       if its possible, returning the resulting error code.
     * 
-    *   @param mpz_t p: first prime number
-    *   @param mpz_t q: second prime number
-    *   @param mpz_t e: public exponent
+    *   @param const char * _p: first prime number
+    *   @param const char * _q: second prime number
+    *   @param const char * _e: public exponent
     */
 
+    mpz_t p, q, e;
+
+    mpz_set_str(p, _p, 10);                          // p = _p
+    mpz_set_str(q, _q, 10);                          // q = _q
+    mpz_set_str(e, _e, 10);                          // e = _e
+
     //  check if p and q are prime numbers
-    if (!isPrime(p) || !isPrime(q)) {
-        return KEY_ERROR_INVALID_PRIMES;
+    if (!__isPrime(p) || !__isPrime(q)) {
+        return "KEY_ERROR_INVALID_PRIMES";
     }
     mpz_t n, mult, gcd;
 
@@ -105,75 +108,99 @@ public_key_result_t generatePublicKey(mpz_t p, mpz_t q, mpz_t e) {
         mpz_clear(n);
         mpz_clear(mult);
         mpz_clear(gcd);
-        return KEY_ERROR_INVALID_E;
+        return "KEY_ERROR_INVALID_E";
     }
     
-    FILE *public_key_file = fopen("public_key.txt", "w");
-    gmp_fprintf(public_key_file, "%Zd %Zd\n", n, e); // save public key to file
+    char *public_key = mpz_get_str(NULL, 10, n);
 
     mpz_clear(n);
     mpz_clear(mult);
     mpz_clear(gcd);
-    fclose(public_key_file);
 
-    return KEY_VALID; // public key was generated successfully
+    return public_key;
 }
 
-void encryptMessage(char *mnsg, mpz_t n, mpz_t e)
+EMSCRIPTEN_KEEPALIVE
+char *encryptMessage(char *msg, const char *_n, const char *_e)
 {
     /*
-     *  void encryptMessage(char *, mpz_t, mpz_t)
-     *      Encrypts a message using RSA protocol for the informed public key in
-     *      "cypher.txt" file.
-     *
-     *  @param char *mnsg: message to be encrypted
-     *  @param mpz_t n: public key modular base
-     *  @param mpz_t e: public exponent
-     */
+    *   char * encryptMessage(char *, const char *, const char *)
+    *       Encrypts a message using RSA protocol for the informed public key in
+    *       "cypher.txt" file.
+    *
+    *   @param char *msg: message to be encrypted
+    *   @param const char * _n: public key modular base
+    *   @param const char * _e: public exponent
+    */
 
-    //  Open cyphertext file
-    FILE *cypher_text = fopen("cypher.txt", "w");
-
+    mpz_t n, e;
     mpz_t m, c;
+    
+    mpz_set_str(n, _n, 10);                         // n = _n
+    mpz_set_str(e, _e, 10);                         // e = _e
 
     mpz_init(m);
     mpz_init(c);
 
+    size_t N = strlen(msg);                         // N = length of msg
+    char *cypher_text = (char *)malloc(N * (mpz_get_ui(n) + 1) * sizeof(char));
+    cypher_text[0] = '\0';                          // initialize cypher_text
+
     //  Encrypt message char by char
-    for (size_t i = 0; i < strlen(mnsg); i++)
+    for (size_t i = 0; i < N; i++)
     {
-        mpz_set_ui(m, (unsigned char)mnsg[i]);      // m = (unsigned)mnsg[i]
+        mpz_set_ui(m, (unsigned char)msg[i]);       // m = (unsigned)msg[i]
         mpz_powm(c, m, e, n);                       // c = m^e mod n
-        gmp_fprintf(cypher_text, "%Zd ", c);
+        strcat(cypher_text, mpz_get_str(NULL, 10, c));
+        strcat(cypher_text, " ");
     }
     
     mpz_clear(m);
     mpz_clear(c);
 
-    fclose(cypher_text);
-    return;
+    return cypher_text;
 }
 
-void decryptMessage(mpz_t *cphr, size_t len, mpz_t p, mpz_t q, mpz_t e)
+EMSCRIPTEN_KEEPALIVE
+char *decryptMessage(char *_cphr, const char *_p, const char *_q, const char *_e)
 {
     /*
-    *   void decryptMessage(mpz_t *, size_t, mpz_t, mpz_t, mpz_t)
+    *   char *decryptMessage(char *, const char *, const char *, const char *)
     *       Decrypts a message using RSA protocol for the informed private key in
     *       "message.txt" file.
     * 
-    *   @param mpz_t *cphr: cyphertext to be decrypted
-    *   @param size_t len: length of the cyphertext
-    *   @param mpz_t p: first prime number
-    *   @param mpz_t q: second prime number
-    *   @param mpz_t e: public exponent
+    *   @param char *_cphr: cyphertext to be decrypted
+    *   @param const char * _p: first prime number
+    *   @param const char * _q: second prime number
+    *   @param const char * _e: public exponent
     */
-
-    //  Open message file
-    FILE *message = fopen("message.txt", "w");
    
     //  Get private key
     mpz_t n, d;
     mpz_t m, mult;
+
+    size_t len = 0, i = 0;
+
+    while (_cphr[i] != '\0')
+    {
+        if (_cphr[i] == ' ') len++;
+        i++;
+    }
+
+    mpz_t cphr[len], p, q, e;
+    char *message = (char *)malloc((len + 1) * sizeof(char));
+    message[len] = '\0';                            // initialize message
+    char c[mpz_get_ui(n) + 1];
+
+    for (size_t i = 0; i < len; i++)
+    {
+        mpz_init(cphr[i]);
+        sscanf(_cphr, "%s", c);
+        mpz_set_str(cphr[i], c, 10);                // cphr[i] = _cphr[i]
+    }
+    mpz_set_str(p, _p, 10);                         // p = _p
+    mpz_set_str(q, _q, 10);                         // q = _q
+    mpz_set_str(e, _e, 10);                         // e = _e
 
     mpz_init(m);
     mpz_init(n);
@@ -192,7 +219,7 @@ void decryptMessage(mpz_t *cphr, size_t len, mpz_t p, mpz_t q, mpz_t e)
     for (size_t i = 0; i < len; i++)
     {
         mpz_powm(m, cphr[i], d, n);                 // m = c^d mod n
-        fprintf(message, "%c", (char)mpz_get_ui(m));
+        strcat(message, mpz_get_str(NULL, 10, m));
     }
 
     mpz_clear(m);
@@ -200,6 +227,5 @@ void decryptMessage(mpz_t *cphr, size_t len, mpz_t p, mpz_t q, mpz_t e)
     mpz_clear(d);
     mpz_clear(mult);
 
-    fclose(message);
-    return;
+    return message;
 }
