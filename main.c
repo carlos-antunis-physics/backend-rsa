@@ -75,21 +75,23 @@ int main()
             printf("Enter the number of characters in the message: ");
             scanf("%u", &len);
             mpz_t p, q, e;
-            mpz_t ciphertext[len];
+            mpz_t ciphertext[len + 1];
             mpz_init(p);
             mpz_init(q);
             mpz_init(e);
-            for (size_t i = 0; i < len; i++)
+            for (size_t i = 0; i < len + 1; i++)
             {
                 mpz_init(ciphertext[i]);
             }
             printf("Enter the ciphertext: ");
-            for (size_t i = 0; i < len; i++)
+            for (size_t i = 0; i < len + 1; i++)
             {
                 gmp_scanf("%Zd", ciphertext[i]);
             }
             printf("Enter the private key (p q e): ");
-            gmp_scanf("%Zd %Zd %Zd", p, q, e);
+            gmp_scanf("%Zd", p);
+            gmp_scanf("%Zd", q);
+            gmp_scanf("%Zd", e);
             // Decrypt message
             decryptMessage(ciphertext, len, p, q, e);
             mpz_clear(p);

@@ -95,9 +95,9 @@ public_key_result_t generatePublicKey(mpz_t p, mpz_t q, mpz_t e) {
 
     mpz_mul(n, p, q);                               // n = p * q
     
-    mpz_sub(mult, n, p);                            // mult = n - p
-    mpz_sub(mult, mult, q);                         // mult = n - p - q
-    mpz_add_ui(mult, mult, 1);                      // mult = n - p - q + 1 = (p - 1)(q - 1)
+    mpz_sub(mult, n, p);                            // mult = pq - p
+    mpz_sub(mult, mult, q);                         // mult = pq - p - q
+    mpz_add_ui(mult, mult, 1);                      // mult = pq - p - q + 1 = (p - 1)(q - 1)
 
     mpz_gcd(gcd, e, mult);                          // gcd = mdc(e, mult)
     if (mpz_cmp_ui(gcd, 1) != 0) {
@@ -130,6 +130,7 @@ void encryptMessage(char *mnsg, mpz_t n, mpz_t e)
      *  @param mpz_t n: public key modular base
      *  @param mpz_t e: public exponent
      */
+
     //  Open cyphertext file
     FILE *cypher_text = fopen("cypher.txt", "w");
 
@@ -141,7 +142,7 @@ void encryptMessage(char *mnsg, mpz_t n, mpz_t e)
     //  Encrypt message char by char
     for (size_t i = 0; i < strlen(mnsg); i++)
     {
-        mpz_set_ui(m, (unsigned int)mnsg[i]);       // m = (unsigned int)mnsg[i]
+        mpz_set_ui(m, (unsigned char)mnsg[i]);      // m = (unsigned)mnsg[i]
         mpz_powm(c, m, e, n);                       // c = m^e mod n
         gmp_fprintf(cypher_text, "%Zd ", c);
     }
@@ -166,12 +167,12 @@ void decryptMessage(mpz_t *cphr, size_t len, mpz_t p, mpz_t q, mpz_t e)
     *   @param mpz_t q: second prime number
     *   @param mpz_t e: public exponent
     */
-    //  Get private key
-    mpz_t n, d;
-    
+
     //  Open message file
     FILE *message = fopen("message.txt", "w");
-
+   
+    //  Get private key
+    mpz_t n, d;
     mpz_t m, mult;
 
     mpz_init(m);
@@ -190,8 +191,8 @@ void decryptMessage(mpz_t *cphr, size_t len, mpz_t p, mpz_t q, mpz_t e)
     //  Decrypt message char by char
     for (size_t i = 0; i < len; i++)
     {
-        mpz_powm(m, cphr[i], d, n);                       // m = c^d mod n
-        gmp_fprintf(message, "%c", (unsigned char)mpz_get_ui(m));
+        mpz_powm(m, cphr[i], d, n);                 // m = c^d mod n
+        fprintf(message, "%c", (char)mpz_get_ui(m));
     }
 
     mpz_clear(m);
