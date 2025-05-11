@@ -1,18 +1,18 @@
 /*
-    * RSA encryption project back-end
-    * 
-    * Created on: 08 - 05 - 2025
-    * 
-    * Authors:
-    *   Carlos, Filipe, Flavia, Giovanna and Mirian.
-    * 
-    * Description:
-    *   This code implements RSA encryption and decryption using GNU Multiple Precision
-    *   Arithmetic Library (GMP). It includes functions to encrypt and decrypt messages,
-    *   as well as to generate RSA keys. The code is designed to educational purposes -
-    *   do not use it in production.
-    * 
-    * Copyright (C) 2025 Carlos, Filipe, Flavia, Giovanna and Mirian
+* RSA encryption project back-end
+* 
+* Created on: 08 - 05 - 2025
+* 
+* Authors:
+*   Carlos, Filipe, Flavia, Giovanna and Mirian.
+* 
+* Description:
+*   This code implements RSA encryption and decryption using GNU Multiple Precision
+*   Arithmetic Library (GMP). It includes functions to encrypt and decrypt messages,
+*   as well as to generate RSA keys. The code is designed to educational purposes -
+*   do not use it in production.
+* 
+* Copyright (C) 2025 Carlos, Filipe, Flavia, Giovanna and Mirian
 */
 
 //  Standard C libraries

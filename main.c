@@ -5,7 +5,6 @@ int main()
 {
     short answer = -1;
 
-
     main_loop:
         printf("Which operation do you want to perform?\n");
         printf("[1] Generate public key\n");
@@ -35,14 +34,13 @@ int main()
             if (r != KEY_VALID)
             {
                 printf("Error generating public key: ");
-                switch (r)
+                if (r == KEY_ERROR_INVALID_PRIMES)
                 {
-                    case KEY_ERROR_INVALID_PRIMES:
-                        printf("Invalid primes.\n");
-                        break;
-                    case KEY_ERROR_INVALID_E:
-                        printf("Invalid e - not coprime to (p - 1)(q - 1).\n");
-                        break;
+                    printf("Invalid primes.\n");
+                }
+                if (r == KEY_ERROR_INVALID_E)
+                {
+                    printf("Invalid e - not coprime to (p - 1)(q - 1).\n");
                 }
             }
             mpz_clear(p);
@@ -52,14 +50,14 @@ int main()
         }
         if (answer == 2)
         {
-            size_t len;
+            unsigned len;
             printf("Enter the number of characters in the message: ");
             scanf("%u", &len);
-            char message[len];
+            char message[len++];
             mpz_t n, e;
             mpz_init(n);
             mpz_init(e);
-            printf("Enter the message: ");
+            printf("Enter the message (do not use ' ' - it'll be solved in Front): ");
             scanf("%s", message);
             printf("Enter the public key (n e): ");
             gmp_scanf("%Zd %Zd", n, e);
@@ -71,21 +69,18 @@ int main()
         }
         if (answer == 3)
         {
-            size_t len;
+            unsigned len;
             printf("Enter the number of characters in the message: ");
             scanf("%u", &len);
             mpz_t p, q, e;
-            mpz_t ciphertext[len + 1];
+            mpz_t ciphertext[len++];
             mpz_init(p);
             mpz_init(q);
             mpz_init(e);
-            for (size_t i = 0; i < len + 1; i++)
+            printf("Enter the ciphertext: ");
+            for (size_t i = 0; i < len; i++)
             {
                 mpz_init(ciphertext[i]);
-            }
-            printf("Enter the ciphertext: ");
-            for (size_t i = 0; i < len + 1; i++)
-            {
                 gmp_scanf("%Zd", ciphertext[i]);
             }
             printf("Enter the private key (p q e): ");
