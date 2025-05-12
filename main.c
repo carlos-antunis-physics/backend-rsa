@@ -1,107 +1,64 @@
-#include <gmp.h>
-#include "RSA.c"
+#include "./backend.c"
 
-int main()
+
+int main(int argc, char const *argv[])
 {
-    short answer = -1;
+    printf("==============================================================\n");
+    printf("====  RSA Protocol backend test using Emscripten and GMP  ====\n");
+    printf("==============================================================\n");
 
-    main_loop:
-        printf("Which operation do you want to perform?\n");
-        printf("[1] Generate public key\n");
-        printf("[2] Encrypt a message\n");
-        printf("[3] Decrypt a message\n");
-        printf("[0] Exit\n");
-        printf("Operation: ");
-        scanf("%hd", &answer);
-        if (answer == 0)
+    short operacao;
+
+    while (true)
+    {
+        printf("\n");
+        printf("************ Qual operação que você irá realizar? ************\n");
+        printf("\n");
+        printf("[1] Gerar chave pública\n");
+        printf("[2] Criptografar mensagem\n");
+        printf("[3] Descriptografar mensagem\n");
+        printf("[0] Encerrar execução\n");
+        printf("\n");
+        printf("Digite a operação desejada: ");
+        scanf("%hd", &operacao);
+        printf("\n");
+        if (operacao == 0)
         {
             return 0;
         }
-        if (answer == 1)
+        else if (operacao == 1)
         {
-            mpz_t p, q, e;
-            mpz_init(p);
-            mpz_init(q);
-            mpz_init(e);
-            printf("Enter prime p: ");
-            gmp_scanf("%Zd", p);
-            printf("Enter prime q: ");
-            gmp_scanf("%Zd", q);
-            printf("Enter value of e: ");
-            gmp_scanf("%Zd", e);
-            // Generate public key
-            public_key_result_t r = generatePublicKey(p, q, e);
-            if (r != KEY_VALID)
-            {
-                printf("Error generating public key: ");
-                if (r == KEY_ERROR_INVALID_PRIMES)
-                {
-                    printf("Invalid primes.\n");
-                }
-                if (r == KEY_ERROR_INVALID_E)
-                {
-                    printf("Invalid e - not coprime to (p - 1)(q - 1).\n");
-                }
-            }
-            mpz_clear(p);
-            mpz_clear(q);
-            mpz_clear(e);
-            goto main_loop;
+            char p[MAX_SIZE], q[MAX_SIZE], e[MAX_SIZE];
+            printf("Digite o valor de p: ");
+            scanf("%s", p);
+            printf("Digite o valor de q: ");
+            scanf("%s", q);
+            printf("Digite o valor de e: ");
+            scanf("%s", e);
+            printf("Chave pública gerada: (%s, %s)\n", generatePublicKey(p, q, e), e);
         }
-        if (answer == 2)
+        else if (operacao == 2)
         {
-            unsigned len;
-            printf("Enter the number of characters in the message: ");
-            scanf("%u", &len);
-            char message[len++];
-            mpz_t n, e;
-            mpz_init(n);
-            mpz_init(e);
-            printf("Enter the message (do not use ' ' - it'll be solved in Front): ");
-            scanf("%s", message);
-            printf("Enter the public key (n e): ");
-            gmp_scanf("%Zd %Zd", n, e);
-            // Encrypt message
-            encryptMessage(message, n, e);
-            mpz_clear(n);
-            mpz_clear(e);
-            goto main_loop;
+            unsigned length;
+            printf("Qual a quantidade de caracteres da mensagem? ");
+            scanf("%u", &length);
+            char msg[] = "amo te";
+            printf("Informe a chave pública (n, e): ");
+            char n[MAX_SIZE], e[MAX_SIZE];
+            scanf("%s %s", n, e);
+            printf("Mensagem criptografada: %s\n", encryptMessage(msg, n, e));
         }
-        if (answer == 3)
+        else if(operacao == 3)
         {
-            unsigned len;
-            printf("Enter the number of characters in the message: ");
-            scanf("%u", &len);
-            mpz_t p, q, e;
-            mpz_t ciphertext[len++];
-            mpz_init(p);
-            mpz_init(q);
-            mpz_init(e);
-            printf("Enter the ciphertext: ");
-            for (size_t i = 0; i < len; i++)
-            {
-                mpz_init(ciphertext[i]);
-                gmp_scanf("%Zd", ciphertext[i]);
-            }
-            printf("Enter the private key (p q e): ");
-            gmp_scanf("%Zd", p);
-            gmp_scanf("%Zd", q);
-            gmp_scanf("%Zd", e);
-            // Decrypt message
-            decryptMessage(ciphertext, len, p, q, e);
-            mpz_clear(p);
-            mpz_clear(q);
-            mpz_clear(e);
-            for (size_t i = 0; i < len; i++)
-            {
-                mpz_clear(ciphertext[i]);
-            }
-            goto main_loop;
+            unsigned length;
+            printf("Qual a quantidade de caracteres da mensagem? ");
+            scanf("%u", &length);
+            char msg[22] = "58 131 155 76 40 118 "; 
+            printf("Informe a chave privada (p, q, e): ");
+            char p[MAX_SIZE], q[MAX_SIZE], e[MAX_SIZE];
+            scanf("%s %s %s", p, q, e);
+            printf("%s\n", msg);
+            printf("Mensagem decifrada: %s\n", decryptMessage(msg, p, q, e));
         }
-        else
-        {
-            answer = -1;
-            printf("Invalid option. Please try again.\n");
-            goto main_loop;
-        }
+    }
 }
