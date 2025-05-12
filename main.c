@@ -42,10 +42,20 @@ int main(int argc, char const *argv[])
             unsigned length;
             printf("Qual a quantidade de caracteres da mensagem? ");
             scanf("%u", &length);
-            char msg[] = "amo te";
+            char msg[length];
             printf("Informe a chave pública (n, e): ");
             char n[MAX_SIZE], e[MAX_SIZE];
             scanf("%s %s", n, e);
+            FILE *file = fopen("mensagem.txt", "r");
+            {
+                size_t i = 0;
+                while (i < length)
+                {
+                    fscanf(file, "%c", &msg[i]);
+                    i++;
+                }
+            }
+            fclose(file);
             printf("Mensagem criptografada: %s\n", encryptMessage(msg, n, e));
         }
         else if(operacao == 3)
@@ -53,11 +63,17 @@ int main(int argc, char const *argv[])
             unsigned length;
             printf("Qual a quantidade de caracteres da mensagem? ");
             scanf("%u", &length);
-            char msg[22] = "58 131 155 76 40 118 "; 
+            char msg[length * MAX_SIZE];
             printf("Informe a chave privada (p, q, e): ");
             char p[MAX_SIZE], q[MAX_SIZE], e[MAX_SIZE];
             scanf("%s %s %s", p, q, e);
-            printf("%s\n", msg);
+            FILE *file = fopen("cifra.txt", "r");
+            {
+                size_t i = 0;
+                while (fscanf(file, "%c", &msg[i]) != EOF)
+                    i++;
+            }
+            fclose(file);
             printf("Mensagem decifrada: %s\n", decryptMessage(msg, p, q, e));
         }
     }
