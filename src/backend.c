@@ -94,34 +94,34 @@ const char *generatePublicKey(const char *_p, const char *_q, const char *_e)
     mpz_set_str(q, _q, 10);                         // q = _q
     mpz_set_str(e, _e, 10);                         // e = _e
 
-    //  check if p and q are prime numbers
-    bool isPrimeP = __isPrime(p);
-    bool isPrimeQ = __isPrime(q);
+    // //  check if p and q are prime numbers
+    // bool isPrimeP = __isPrime(p);
+    // bool isPrimeQ = __isPrime(q);
 
-    if (!isPrimeP && !isPrimeQ)
-    {
-        mpz_clear(p);
-        mpz_clear(q);
-        mpz_clear(e);
+    // if (!isPrimeP && !isPrimeQ)
+    // {
+    //     mpz_clear(p);
+    //     mpz_clear(q);
+    //     mpz_clear(e);
 
-        return "KEY_ERROR: ambos os primos invalidos";
-    }
-    else if (!isPrimeP)
-    {
-        mpz_clear(p);
-        mpz_clear(q);
-        mpz_clear(e);
+    //     return "KEY_ERROR: ambos os primos invalidos";
+    // }
+    // else if (!isPrimeP)
+    // {
+    //     mpz_clear(p);
+    //     mpz_clear(q);
+    //     mpz_clear(e);
 
-        return "KEY_ERROR: primeiro primo invalido";
-    }
-    else if (!isPrimeQ)
-    {
-        mpz_clear(p);
-        mpz_clear(q);
-        mpz_clear(e);
+    //     return "KEY_ERROR: primeiro primo invalido";
+    // }
+    // else if (!isPrimeQ)
+    // {
+    //     mpz_clear(p);
+    //     mpz_clear(q);
+    //     mpz_clear(e);
 
-        return "KEY_ERROR: primeiro primo invalido";
-    }
+    //     return "KEY_ERROR: primeiro primo invalido";
+    // }
 
     //  check if e is coprime with the Euler's totient function
     mpz_t n;
